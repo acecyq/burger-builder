@@ -1,8 +1,9 @@
-import * as Actions from './Actions';
+import * as actionTypes from '../actions/actionTypes';
 
 const startState = {
     ingredients: null,
-    totalPrice: 4
+    totalPrice: 4,
+    error: false
 }
 
 export default (state = startState, action) => {
@@ -14,17 +15,22 @@ export default (state = startState, action) => {
     };
 
     switch (action.type) {
-        case Actions.GETING:
+        case actionTypes.GET_ING:
             return {
                 ...state,
                 ingredients: action.ingredients
-            }
-        case Actions.ADDING:
+            };
+        case actionTypes.CATCH_ERR:
+            return {
+                ...state,
+                error: action.err
+            };
+        case actionTypes.ADD_ING:
             const addState = JSON.parse(JSON.stringify(state));
             addState.ingredients[action.ingredient] += 1;
             addState.totalPrice += PRICES[action.ingredient];
             return addState;
-        case Actions.REMING:
+        case actionTypes.REM_ING:
             const remState = JSON.parse(JSON.stringify(state));
             remState.ingredients[action.ingredient] -= 1;
             remState.totalPrice -= PRICES[action.ingredient];

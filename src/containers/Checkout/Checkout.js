@@ -55,15 +55,9 @@ class Checkout extends Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		ing: state.ingredients,
-		price: state.totalPrice
-	};
-}
+const mapStateToProps = state => ({
+	ing: state.ingredients,
+	price: state.totalPrice
+});
 
-const mapDispatchToProps = dispatch => {
-	return null;
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Checkout)
+export default connect(mapStateToProps)(Checkout)

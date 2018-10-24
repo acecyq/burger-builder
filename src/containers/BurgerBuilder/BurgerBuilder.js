@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
-import * as Actions from '../../store/Actions';
+
+import * as bba from '../../store/actions/BurgerBuilder';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import Modal from '../../components/UI/Modal/Modal';
@@ -11,33 +12,14 @@ import axios from '../../axios-orders';
 
 class BurgerBuilder extends Component {
 	state = {
-		ingredients : null,
-
-		// all burgers start at $4
-		totalPrice : 4,
-
-		// if true, Modal will show
 		checkOut : false,
-
-		// if true, Spinner will show
-		loading : false,
-		error : false
+		loading : false
 	}
 
 	// run get request to server to get ingredients
 	// componentDidMount() runs after render so that the component can render first before getting a response
 	componentDidMount() {
-		axios.get('/ingredients.json')
-			.then(res => {
-				this.props.getIng(res.data);
-			})
-			.catch(err => {
-				this.setState({
-
-					// if error, set this.state.error = true
-					error : true
-				})
-			});
+		this.props.fetchIng('/ingredients.json');
 	}
 
 	checkOutHandler = () => {
@@ -51,7 +33,7 @@ class BurgerBuilder extends Component {
 		/*
 		//////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////
-		ALTERNATIVE METHOD
+		PREV ALTERNATIVE METHOD
 		//////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////
 		*/
@@ -65,12 +47,21 @@ class BurgerBuilder extends Component {
 		// 	search : `?${queryString}`
 		// });
 
-		let queryString = `checkout?`;
-		for (let ingredient in this.props.ing) {
-			queryString = queryString.concat(`${ingredient}=${this.props.ing[ingredient]}&`);
-		}
-		queryString = queryString.concat(`price=${this.props.price}`);
-		this.props.history.push(`/${queryString}`);
+		/*
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		PREV METHOD
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		*/
+		// let queryString = `checkout?`;
+		// for (let ingredient in this.props.ing) {
+		// 	queryString = queryString.concat(`${ingredient}=${this.props.ing[ingredient]}&`);
+		// }
+		// queryString = queryString.concat(`price=${this.props.price}`);
+		// this.props.history.push(`/${queryString}`);
+
+		this.props.history.push('/checkout');
 	}
 	
 	render() {
@@ -105,7 +96,7 @@ class BurgerBuilder extends Component {
 			);
 
 		// if there is no ingredients AND no errors, show spinner. so it tells that page is loading
-		} else if (!this.state.error) {
+		} else if (!this.props.error) {
 			afterModal = (
 				<div style={{ textAlign : "center" }}>
 					<Spinner />
@@ -113,7 +104,7 @@ class BurgerBuilder extends Component {
 			);
 
 		// if there is no ingredient and error is returned, show user that ingredients could not be loaded
-		} else if (this.state.error) {
+		} else if (this.props.error) {
 			afterModal = (
 				<h1>Ingredients could not be loaded!</h1>
 			);
@@ -135,19 +126,16 @@ class BurgerBuilder extends Component {
 	}
 }
 
-const mapStateToProps = state => {
-	return {
-		ing: state.ingredients,
-		price: state.totalPrice
-	};
-}
+const mapStateToProps = state => ({
+	ing: state.ingredients,
+	price: state.totalPrice,
+	error: state.error
+})
 
-const mapDispatchToProps = dispatch => {
-	return {
-		getIng: (data) => dispatch({ type: Actions.GETING, ingredients: data }),
-		addIng: (ing) => dispatch({ type: Actions.ADDING, ingredient: ing}),
-		remIng: (ing) => dispatch({ type: Actions.REMING, ingredient: ing})
-	};
-}
+const mapDispatchToProps = dispatch => ({
+	fetchIng: url => dispatch(bba.fetchIng(url)),
+	addIng: ing => dispatch(bba.addIng(ing)),
+	remIng: ing => dispatch(bba.remIng(ing))
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(ErrorHandler(BurgerBuilder, axios));
